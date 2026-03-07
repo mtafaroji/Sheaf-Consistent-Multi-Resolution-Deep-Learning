@@ -1,0 +1,34 @@
+__pycache__/
+*.pyc
+*.pt
+*.pth
+outputs/
+experiments/
+data/processed/
+OLD_CODE/
+
+.ipynb_checkpoints/
+outputs/models/
+outputs/figures/
+*.pt
+*.pth
+.DS_Store
+# virtual environment
+venv/
+
+# python cache
+__pycache__/
+*.pyc
+
+# pytorch models
+*.pt
+*.pth
+
+# outputs
+outputs/
+
+# jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
