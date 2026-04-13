@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from src.datasets.LSTMDataset import SimpleSIRDataset
+from src.datasets.TCNDataset import SimpleSIRDataset
 from src.models.TCN_Forecast import TCNForecast
 
 # --------------------------------------------------

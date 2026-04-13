@@ -65,14 +65,6 @@ dataset = MultiResSIRDataset(
     norm_stats_path = norm_path
 )
 
-
-
-
-
-
-
-
-
 print("States shape:", states.shape)
 print("Segment start:", segment_start)
 print("Segment end:", segment_start + segment_length)

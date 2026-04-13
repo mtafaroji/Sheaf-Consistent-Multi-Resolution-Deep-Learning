@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 import pandas as pd
 import os
 
-from src.datasets.LSTMDataset import SimpleSIRDataset
+from src.datasets.GRUDataset import SimpleSIRDataset
 from src.models.GRUForecast import GRUForecast
 
 

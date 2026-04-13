@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 import pandas as pd
 import os
 
-from src.datasets.LSTMDataset import SimpleSIRDataset
+from src.datasets.TCNDataset import SimpleSIRDataset
 from src.models.TCN_Forecast import TCNForecast
 
 
