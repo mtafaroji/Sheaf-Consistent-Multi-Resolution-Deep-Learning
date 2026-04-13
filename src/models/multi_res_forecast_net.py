@@ -4,22 +4,12 @@ import torch.nn.functional as F
 
 
 class ResolutionForecastNet(nn.Module):
-    """
-    Causal Temporal Conv + MLP Decoder (Residual)
-
-    Input:
-        x : (batch, K, 6)
-            3 resolution channels + 3 params (broadcast)
-
-    Output:
-        future : (batch, T_out, 3)
-    """
 
     def __init__(
         self,
         K,
         T_out,
-        hidden_channels=8,
+        hidden_channels=64,
         kernel_size=3,
         stride=1,
         dilation=1,
@@ -31,7 +21,6 @@ class ResolutionForecastNet(nn.Module):
         self.T_out = T_out
 
         in_channels = 6
-
         padding = (kernel_size - 1) * dilation
 
         # ---- Conv layers ----
@@ -59,7 +48,7 @@ class ResolutionForecastNet(nn.Module):
             padding=padding
         )
 
-        # ---- MLP Decoder ----
+        # ---- MLP ----
         self.mlp = nn.Sequential(
             nn.Linear(hidden_channels, mlp_hidden),
             nn.GELU(),
@@ -75,30 +64,40 @@ class ResolutionForecastNet(nn.Module):
 
         B, K, _ = x.shape
 
-        # ---- Conv1D expects (B, C, T)
+        # ---- to (B, C, T)
         x = x.permute(0, 2, 1)
 
-        # ---- Causal Conv ----
-        h = F.gelu(self.conv1(x))
+        # =========================
+        # Block 1 (no skip)
+        # =========================
+        h = self.conv1(x)
+        h = h[:, :, :K]
+        h = F.gelu(h)
+
+        # =========================
+        # Block 2 (ResNet block)
+        # =========================
+        res = h
+
+        h = self.conv2(h)
+        h = h[:, :, :K]
+        h = F.gelu(h)
+
+        h = self.conv3(h)
         h = h[:, :, :K]
 
-        h = F.gelu(self.conv2(h))
-        h = h[:, :, :K]
-
-        h = F.gelu(self.conv3(h))
-        h = h[:, :, :K]
+        h = h + res
+        h = F.gelu(h)
 
         # ---- Global pooling
-        h = torch.mean(h, dim=-1)   # (B, hidden_channels)
+        h = torch.mean(h, dim=-1)   # (B, 64)
 
         # ---- Decode
-        delta = self.mlp(h)         # (B, T_out*3)
+        delta = self.mlp(h)
         delta = delta.view(B, self.T_out, 3)
 
-        # ---- Residual prediction
-        last_state = x[:, :3, -1]   # فقط S,I,R
-        last_state = last_state.unsqueeze(1)  # (B,1,3)
-
+        # ---- Residual output
+        last_state = x[:, :3, -1].unsqueeze(1)
         future = last_state + delta
 
         return future
